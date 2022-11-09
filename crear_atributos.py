@@ -1,22 +1,21 @@
+import arcpy
 import os
 import re
 
-folder = os.getcwd() + '\especies'
-path_especies = os.listdir(folder)
+path_especies = os.getcwd() + '\\especies'
+path_shapes = os.getcwd() + '\\shapes'
+especie_listdir = os.listdir(path_especies)
 anio_actual = "2022"
 anio_pasado = "-6000"
 
-# Aqui se define la palabra que queremos cambiar
-tif = '.tif'
-
 # Se recorren las carpetas de especies
-for folder_especie in path_especies:
-    directorio = folder + '\\' + folder_especie
+for folder_especie in especie_listdir:
+    directorio = path_especies + '\\' + folder_especie
     folder_path = os.listdir(directorio)
     # Se recorren los archivos en la carpeta de la especie
     for archivo in folder_path:
         # Se indica que trabajaremos con los archivos .tif
-        if archivo.find(tif) != -1:
+        if re.search(".tif", archivo):
             archivo_split = archivo.split('_')
 
             nombre_especie = archivo_split[0] + ' ' + archivo_split[1]
@@ -38,3 +37,5 @@ for folder_especie in path_especies:
                 escenario = archivo_split[2][0:2]
             print archivo_split
             print nombre_especie, tiempo, anio, escenario, '\n'
+
+            Raster_entrada = arcpy.GetParameterAsText(0)
