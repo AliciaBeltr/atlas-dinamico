@@ -8,20 +8,26 @@ especie_listdir = os.listdir(path_especies)
 anio_actual = "2022"
 anio_pasado = "-6000"
 
+especies_en_peligro = []
+especies_amenazadas = []
+
 # Se recorren las carpetas de especies
+
 for folder_especie in especie_listdir:
     directorio = path_especies + '\\' + folder_especie
     folder_path = os.listdir(directorio)
     # Se recorren los archivos en la carpeta de la especie
     for archivo in folder_path:
         # Se indica que trabajaremos con los archivos .tif
-        if re.search(".tif", archivo):
+        if archivo[-4:] == ".tif":
             archivo_split = archivo.split('_')
 
             nombre_especie = archivo_split[0] + ' ' + archivo_split[1]
             tiempo = ''
             anio = ''
             escenario = ''
+            estado_conservacion = ''
+
             # Creamos los datos segun escenario
             if re.search("pasado", archivo_split[2]):
                 tiempo = "Pasado"
@@ -35,7 +41,42 @@ for folder_especie in especie_listdir:
                 tiempo = "Futuro"
                 anio = archivo_split[2][4:8]
                 escenario = archivo_split[2][0:2]
-            print archivo_split
-            print nombre_especie, tiempo, anio, escenario, '\n'
 
-            Raster_entrada = arcpy.GetParameterAsText(0)
+            # IF PARA SELECCIONAR ESPECIES EN PELIGRO
+            if nombre_especie in especies_en_peligro:
+                estado_conservacion = "En Peligro"
+            elif nombre_especie in especies_amenazadas:
+                estado_conservacion = "Amenazada"
+            else:
+                estado_conservacion = "Preocupacion menor"
+
+            # print archivo_split
+            # print nombre_especie, tiempo, anio, escenario, '\n'
+
+            # Se crea un entorno de trabajo para la especie
+            workspace_especie = path_shapes + "\\" + nombre_especie
+            # print workspace_especie
+            arcpy.env.workspace = workspace_especie
+            arcpy.env.overwriteOutput = True
+            raster_entrada = path_especies + '\\' + folder_especie + '\\' + archivo
+            poligono_salida = raster_entrada[:-4] + ".shp"
+
+            # Process: Raster to Polygon
+            tempEnvironmentZ = arcpy.env.outputZFlag
+            arcpy.env.outputZFlag = "Disabled"
+            tempEnvironmentM = arcpy.env.outputMFlag
+            arcpy.env.outputMFlag = "Disabled"
+            try:
+                arcpy.RasterToPolygon_conversion(
+                    raster_entrada,
+                    poligono_salida,
+                    "NO_SIMPLIFY",
+                    "Value",
+                    "SINGLE_OUTER_PART",
+                    ""
+                )
+            except Exception as e:
+                print "Fallo el archivo", archivo
+                print e
+            else:
+                print "Todo bien"
