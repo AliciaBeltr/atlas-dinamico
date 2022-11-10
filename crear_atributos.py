@@ -2,7 +2,7 @@ import arcpy
 import os
 import re
 
-path_especies = os.getcwd() + '\\especies'
+path_especies = os.getcwd() + '\\especies_int'
 path_shapes = os.getcwd() + '\\shapes'
 especie_listdir = os.listdir(path_especies)
 anio_actual = "2022"
@@ -59,7 +59,7 @@ for folder_especie in especie_listdir:
             arcpy.env.workspace = workspace_especie
             arcpy.env.overwriteOutput = True
             raster_entrada = path_especies + '\\' + folder_especie + '\\' + archivo
-            poligono_salida = raster_entrada[:-4] + ".shp"
+            poligono_salida = path_shapes + '\\' + folder_especie + '\\' + archivo[:-4] + ".shp"
 
             # Process: Raster to Polygon
             tempEnvironmentZ = arcpy.env.outputZFlag
@@ -79,4 +79,4 @@ for folder_especie in especie_listdir:
                 print "Fallo el archivo", archivo
                 print e
             else:
-                print "Todo bien"
+                print "Se realizo el raseter de:", archivo
