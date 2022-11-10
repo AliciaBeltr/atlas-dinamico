@@ -8,20 +8,21 @@ especie_listdir = os.listdir(path_especies)
 anio_actual = "2022"
 anio_pasado = "-6000"
 
-especies_en_peligro = []
-especies_amenazadas = []
+especies_amenazadas = ["Diphysa americana", "Dussia cuscatlanica","Maclura tinctoria","Manilkara chicle","Sloanea terniflora"]
+especies_en_peligro = ["Guaiacum sanctum", "Lonchocarpus rugosus", "Ulmus mexicana"]
 
 # Se recorren las carpetas de especies
 
 for folder_especie in especie_listdir:
     directorio = path_especies + '\\' + folder_especie
     folder_path = os.listdir(directorio)
+    # Se crea una carpeta para guardar los shapes
+    os.mkdir(path_shapes + '\\' + folder_especie)
     # Se recorren los archivos en la carpeta de la especie
     for archivo in folder_path:
         # Se indica que trabajaremos con los archivos .tif
         if archivo[-4:] == ".tif":
             archivo_split = archivo.split('_')
-
             nombre_especie = archivo_split[0] + ' ' + archivo_split[1]
             tiempo = ''
             anio = ''
@@ -79,4 +80,43 @@ for folder_especie in especie_listdir:
                 print "Fallo el archivo", archivo
                 print e
             else:
-                print "Se realizo el raseter de:", archivo
+                print "Se realizo el raster de:", archivo
+                # Se crean columnas
+                arcpy.AddField_management(poligono_salida, "especie", "TEXT", "", "", "20")
+                arcpy.AddField_management(poligono_salida, "tiempo", "TEXT", "", "", "20")
+                arcpy.AddField_management(poligono_salida, "conserv", "TEXT", "", "", "20")
+                arcpy.AddField_management(poligono_salida, "clasif", "TEXT", "", "", "20")
+                arcpy.AddField_management(poligono_salida, "anno", "TEXT", "", "", "20")
+                arcpy.AddField_management(poligono_salida, "escenario", "TEXT", "", "", "20")
+                # Se agregan los valores
+                arcpy.CalculateField_management(poligono_salida,
+                                                "especie",
+                                                '!especie!.replace("","' + nombre_especie + '")',
+                                                "PYTHON_9.3"
+                                                )
+                arcpy.CalculateField_management(poligono_salida,
+                                                "tiempo",
+                                                '!tiempo!.replace("","' + tiempo + '")',
+                                                "PYTHON_9.3"
+                                                )
+                arcpy.CalculateField_management(poligono_salida,
+                                                "conserv",
+                                                '!conserv!.replace("","' + estado_conservacion + '")',
+                                                "PYTHON_9.3"
+                                                )
+                arcpy.CalculateField_management(poligono_salida,
+                                                "clasif",
+                                                '!clasif!.replace("","Arbol")',
+                                                "PYTHON_9.3"
+                                                )
+                arcpy.CalculateField_management(poligono_salida,
+                                                "anno",
+                                                '!anno!.replace("","' + anio + '")',
+                                                "PYTHON_9.3"
+                                                )
+                arcpy.CalculateField_management(poligono_salida,
+                                                "escenario",
+                                                '!escenario!.replace("","' + escenario + '")',
+                                                "PYTHON_9.3"
+                                                )
+                print '\n'
